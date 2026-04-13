@@ -11,6 +11,41 @@ Software often encounters abnormal conditions (missing inputs, invalid syntaxes,
 
 ---
 
+## Examples 
+**Cisco ASA (CVE-2020-3452)**
+This was a critical Path Traversal vulnerability in the Cisco Adaptive Security Appliance (ASA) and Firepower Threat Defense (FTD) software.
+
+Exceptional Condition: The web-based management interface failed to properly handle specially crafted URLs that included directory traversal sequences (e.g., +./).
+
+Mishandling: Instead of throwing a generic "404 Not Found" or a "403 Forbidden" error and terminating the request, the system processed the malformed input.
+
+Outcome: Attackers could view arbitrary files on the local file system. The input was handled by revealing internal system data rather than failing securely.
+
+
+**WordPress xmlrpc.php**
+The xmlrpc.php file is a legacy feature for remote updates, but it is a frequent source of security issues.
+
+Exceptional Condition: When an attacker sends a massive "system.multicall" request containing hundreds of login attempts or complex queries.
+
+Mishandling: The server often fails to handle the resource exhaustion or the logic of multiple authentication failures within a single request.
+
+Outcomes: 
+   - Information Disclosure: Sometimes, verbose XML responses reveal whether a username exists based on the specific error code returned.
+   - DoS: The server mishandles the "exception" of a high-load request, leading to a denial of service.
+   - Brute Force: The application fails to apply standard "exceptional condition" blocks (like rate limiting) to this specific endpoint.
+
+**AWS Lambda Verbose Errors**
+Serverless functions are highly susceptible to A10 vulnerabilities if the runtime environment isn't hardened.
+
+Exceptional Condition: A function crashes due to an unhandled exception (e.g., a database timeout, a null pointer, or an invalid API key).
+
+Mishandling: If the developer hasn't implemented try-catch blocks with sanitized outputs, the Lambda may return a raw stack trace or environment details to the caller.
+
+Outcomes: 
+   - Sensitive Data Leakage: Verbose errors can reveal internal file paths (e.g., /var/task/...), library versions, or even partial environment variables.
+   - Logic Mapping: Attackers use these "exceptional" stack traces to map out the backend architecture and identify further vulnerabilities in the code logic.
+
+
 ## 🚀 Running the Demonstration
 
 1. Run the application:
@@ -65,5 +100,4 @@ The developer learned about exceptions crashing the system on invalid SQL keywor
 **The Setup**:
 - The API is at `/api/challenge`.
 - The developer implemented a regex to remove dangerous words like `UNION`, `DROP`, and `'`.
-- **Hint**: Is the parameter *always* a string? What happens if you modify the JSON structure sent to the server from a string to an array?
 - **How to Win**: You must cause the internal SQL parser to crash with a "Syntax Error" by bypassing the regex replacement, forcing the server to mishandle the exception and leak `FLAG{...}` to you!

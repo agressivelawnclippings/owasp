@@ -8,6 +8,26 @@ export default function Home() {
   const [hardenedId, setHardenedId] = useState("1");
   const [response, setResponse] = useState<any>(null);
   const [ctfInput, setCtfInput] = useState('{"id": "1"}');
+  const [openHints, setOpenHints] = useState<Record<number, boolean>>({});
+
+  const hints = [
+    {
+      label: "Hint 1 — Think about intent",
+      text: "The developer was worried about what the query contains. They forgot to worry about what type is. (if (typeof id === 'string')) What if it's not a string?",
+    },
+    {
+      label: "Hint 2 — Read the condition",
+      text: "The blocklist filter only runs inside an if statement. If the input is not a string, it won't filter anything. What if you send a different type?",
+    },
+    {
+      label: "Hint 3 — Almost there",
+      text: "JSON can represent more than just strings, what if you could pass an array as the id number? Would it get filtered?",
+    },
+  ];
+
+  const toggleHint = (index: number) => {
+    setOpenHints((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   const testVulnerable = async () => {
     try {
@@ -164,6 +184,30 @@ export default function Home() {
                 >
                   Send Payload
                 </button>
+
+                <div className="pt-2 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Need a nudge?</p>
+                  {hints.map((hint, index) => (
+                    <div key={index} className="rounded-xl border border-slate-700/60 overflow-hidden">
+                      <button
+                        onClick={() => toggleHint(index)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-300 hover:bg-slate-700/40 transition-colors duration-200"
+                      >
+                        <span>{hint.label}</span>
+                        <span className="text-slate-500 text-lg leading-none transition-transform duration-200"
+                          style={{ display: "inline-block", transform: openHints[index] ? "rotate(45deg)" : "rotate(0deg)" }}>
+                          +
+                        </span>
+                      </button>
+                      {openHints[index] && (
+                        <div className="px-4 pb-4 pt-1 text-sm text-slate-400 bg-slate-900/40 border-t border-slate-700/40">
+                          {hint.text}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
               </div>
             )}
           </div>
